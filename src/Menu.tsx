@@ -8,8 +8,8 @@ export default function Menu(){
                 <div className="collapse navbar-collapse">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                         <li className="nav-item">
-                            <NavLink className="nav-link" to="/movies/create">
-                                Create Movie
+                            <NavLink className="nav-link" to="/genres">
+                                Genres
                             </NavLink>
                         </li>
                         <li className="nav-item">
@@ -18,18 +18,18 @@ export default function Menu(){
                             </NavLink>
                         </li>
                         <li className="nav-item">
-                            <NavLink className="nav-link" to="/genres">
-                                Genres
-                            </NavLink>
-                        </li>
-                        <li className="nav-item">
                             <NavLink className="nav-link" to="/actors">
                                 Actors
                             </NavLink>
-                         </li>
-                         <li className="nav-item">
+                        </li>
+                        <li className="nav-item">
                             <NavLink className="nav-link" to="/movietheaters">
                                 Movie Theaters
+                            </NavLink>
+                        </li>
+                        <li className="nav-item">
+                            <NavLink className="nav-link" to="/movies/create">
+                                Create a Movie
                             </NavLink>
                         </li>
                     </ul>
@@ -38,22 +38,3 @@ export default function Menu(){
         </nav>
     )
 }
-//Achor components refresh the whole application when you clic on menu buttons
-// export default function Menu(){
-//     return (
-//         <nav className="navbar navbar-expand-lg navbar-light bg-light">
-//             <div className="container-fluid">
-//                 <a className="navbar-brand" href="/">React Movies</a>
-//                 <div className="collapse navbar-collapse">
-//                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-//                         <li className="nav-item">
-//                             <a className="nav-link" href="/genres">
-//                                 Genres
-//                             </a>
-//                         </li>
-//                     </ul>
-//                 </div>
-//             </div>
-//         </nav>
-//     )
-// }

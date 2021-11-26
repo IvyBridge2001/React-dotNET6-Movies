@@ -19,10 +19,10 @@ class ErrorBoundary extends React.Component<errorBoundaryProps, errorBoundarySta
         if (this.state.hasError){
             if (this.props.errorUI){
                 return this.props.errorUI;
-            } else {
+            } else{
                 return <h3>{this.state.message}</h3>
             }
-        } else {
+        } else{
             return this.props.children;
         }
     }
@@ -33,8 +33,8 @@ interface errorBoundaryProps{
 }
 
 interface errorBoundaryState{
-    hasError: boolean;
-    message:string
+    hasError: boolean; 
+    message: string;
 }
 
 export default ErrorBoundary;
