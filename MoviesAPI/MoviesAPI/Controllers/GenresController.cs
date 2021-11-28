@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MoviesAPI.Services;
 using MoviesAPI.Entities;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace MoviesAPI.Controllers
 {
@@ -18,34 +19,59 @@ namespace MoviesAPI.Controllers
         [HttpGet] // /api/genres
         [HttpGet("list")] // api/genres/list/
         [HttpGet("/allgenres")] // /allgenres
-        public List<Genre> Get()
+        public async Task<ActionResult<List<Genre>>> Get()
         {
-            return repository.GetAllGenres();
+            return await repository.GetAllGenres();
         }
 
         //[HttpGet("example")]
         //[HttpGet("{Id:int}/{param2=felipe}")]
         [HttpGet("{Id}")]
-        public Genre Get(int Id)
+        public ActionResult<Genre> Get(int Id, [BindRequired] string param2)
         {
+            //BindNever will not bring the value form the request
+            //BindRequired maskes param obligatory
+            //FromHeader,FromBody,FromQuery,FromRoute,FromService
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var genre = repository.GetGenreById(Id);
 
             if (genre == null)
             {
-                //return NotFound();
+                return NotFound();
             }
 
             return genre;
         }
 
         [HttpPost]
-        public void Post(){}
+        public ActionResult Post([FromBody] Genre genre)
+        {
+            return NoContent();
+        }
 
         [HttpPut]
-        public void Put() { }
+        public ActionResult Put([FromBody] Genre genre)
+        {
+            return NoContent();
+        }
 
         [HttpDelete]
-        public void Delete() { }
+        public ActionResult Delete()
+        {
+            return NoContent();
+        }
+
+        //IActionResult Example
+        //public IActionResult IExample(int Id)
+        //{
+        //    if (Id == 0)
+        //        return NotFound();
+        //    return Ok(Id);
+        //}
 
     }
 }
