@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using MoviesAPI;
+using MoviesAPI.APIBehavior;
 using MoviesAPI.Filters;
-using MoviesAPI.Services;
+using AutoMapper;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,56 +13,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add(typeof(MyExceptionFilter));
-});
+    options.Filters.Add(typeof(ParseBadRequest));
+}).ConfigureApiBehaviorOptions(BadRequestBehavior.Parse);
+
 builder.Services.AddResponseCaching();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
-builder.Services.AddSingleton<IRepository, InMemoryRepository>();
-builder.Services.AddTransient<MyActionFilter>();
-//AddTransient a new instance for every request
-//AddSingleton 1 instance for all requests
-//AddScoped one for each http request
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<ApplicationDBContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddCors(options =>
+{
+    var frontEdnURL = builder.Configuration.GetValue<string>("frontend_url");
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.WithOrigins(frontEdnURL).AllowAnyMethod().AllowAnyHeader();
+    });
+});
+
+builder.Services.AddAutoMapper(typeof(Program));
+
 var app = builder.Build();
 
-//app.Run(async context =>
-//{
-//    await context.Response.WriteAsync("Short circuiting the pipeline");
-//});
-
-//app.Use(async (context, next) =>
-//{
-//    using (var swapStream = new MemoryStream())
-//    {
-//        var originalResponseBody = context.Response.Body;
-//        context.Response.Body = swapStream;
-
-//        await next.Invoke();
-
-//        swapStream.Seek(0, SeekOrigin.Begin);
-//        string responseBody = new StreamReader(swapStream).ReadToEnd();
-//        swapStream.Seek(0, SeekOrigin.Begin);
-
-//        await swapStream.CopyToAsync(originalResponseBody);
-//        context.Response.Body = originalResponseBody;
-
-//        var logger = new ILogger<Program>();
-        
-//        logger.LogInformation(responseBody);  
-//    }
-//});
-
-//app.Map("/map1", (app) =>
-//{
-//    app.Run(async context =>
-//    {
-//        await context.Response.WriteAsync("Short circuiting the pipeline");
-//    });
-//}
-//);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -71,7 +52,7 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseResponseCaching();
+app.UseCors();
 
 app.UseAuthentication();
 

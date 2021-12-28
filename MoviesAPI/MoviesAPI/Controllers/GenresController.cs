@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MoviesAPI.Services;
 using MoviesAPI.Entities;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using MoviesAPI.Filters;
+using Microsoft.EntityFrameworkCore;
+using MoviesAPI.DTOs;
+using AutoMapper;
 
 namespace MoviesAPI.Controllers
 {
@@ -13,81 +15,54 @@ namespace MoviesAPI.Controllers
     [ApiController]
     public class GenresController : ControllerBase
     {
-        private readonly IRepository repository;
         private readonly ILogger<GenresController> logger;
+        private readonly ApplicationDBContext context;
+        private readonly IMapper mapper;
 
-        public GenresController(IRepository repository, ILogger<GenresController> logger)
+        public GenresController( ILogger<GenresController> logger, ApplicationDBContext context, IMapper mapper)
         {
-            this.repository = repository;
             this.logger = logger;
+            this.context = context;
+            this.mapper = mapper;
         }
 
         [HttpGet] // /api/genres
-        [HttpGet("list")] // api/genres/list/
-        [HttpGet("/allgenres")] // /allgenres
-        [ResponseCache(Duration = 60)]
-        [ServiceFilter(typeof(MyActionFilter))]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<ActionResult<List<Genre>>> Get()
+        public async Task<ActionResult<List<GenreDTO>>> Get()
         {
             logger.LogInformation("Getting all the genres");
-            return await repository.GetAllGenres();
+
+            var genres = await context.Genres.ToListAsync();
+
+            return mapper.Map<List<GenreDTO>>(genres);
         }
 
-        //[HttpGet("example")]
-        //[HttpGet("{Id:int}/{param2=felipe}")]
-        //public ActionResult<Genre> Get(int Id, [BindRequired] string param2)
-        [HttpGet("{Id}")]
+        [HttpGet("{Id:int}", Name = "getGenre")]
         public ActionResult<Genre> Get(int Id)
         {
-            //BindNever will not bring the value form the request
-            //BindRequired maskes param obligatory
-            //FromHeader,FromBody,FromQuery,FromRoute,FromService
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
-            //not necessary because of the apicontroller decorator
-            logger.LogDebug("get by Id method executing...");
-            var genre = repository.GetGenreById(Id);
-
-            if (genre == null)
-            {
-                logger.LogWarning($"Genre with Id {Id} not found");
-                //throw new ApplicationException();
-                return NotFound();
-            }
-
-            return genre;
+            throw new NotImplementedException();
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] Genre genre)
+        public async Task<ActionResult> Post([FromBody] GenreCreationDTO genreCreationDTO)
         {
-            repository.AddGenre(genre);
-
+            var genre = mapper.Map<Genre>(genreCreationDTO);
+            //context.Genres.Add(genre);
+            context.Add(genre);
+            await context.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpPut]
         public ActionResult Put([FromBody] Genre genre)
         {
-            return NoContent();
+            throw new NotImplementedException();
         }
 
         [HttpDelete]
         public ActionResult Delete()
         {
-            return NoContent();
+            throw new NotImplementedException();
         }
-
-        //IActionResult Example
-        //public IActionResult IExample(int Id)
-        //{
-        //    if (Id == 0)
-        //        return NotFound();
-        //    return Ok(Id);
-        //}
 
     }
 }

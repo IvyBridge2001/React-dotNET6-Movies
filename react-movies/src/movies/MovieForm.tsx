@@ -13,6 +13,7 @@ import { genreDTO } from "../genres/genres.model";
 import { movieTheaterDTO } from "../movietheaters/movieTheater.model";
 import TypeAheadActor from '../forms/TypeAheadActors';
 import { actorMovieDTO } from "../actors/actors.model";
+import MarkdownField from "../forms/MarkdownField";
 
 export default function MovieForm(props: movieFormProps) {
 
@@ -56,6 +57,8 @@ export default function MovieForm(props: movieFormProps) {
                     <ImageField displayName="Poster" field="poster"
                         imageURL={props.model.posterURL}
                     />
+
+                    <MarkdownField displayName="Summary" field="summary" />
 
                     <MultipleSelector
                         displayName="Genres"
@@ -102,7 +105,7 @@ export default function MovieForm(props: movieFormProps) {
 
                     <Button disabled={formikProps.isSubmitting}
                         type='submit'>Save Changes</Button>
-                    <Link className="btn btn-secondary" to="/genres">Cancel</Link>
+                    <Link className="btn btn-secondary" to="/">Cancel</Link>
                 </Form>
             )}
         </Formik>
