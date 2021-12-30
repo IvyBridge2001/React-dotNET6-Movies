@@ -7,6 +7,7 @@ using MoviesAPI.Filters;
 using Microsoft.EntityFrameworkCore;
 using MoviesAPI.DTOs;
 using AutoMapper;
+using MoviesAPI.Helpers;
 
 namespace MoviesAPI.Controllers
 {
@@ -27,19 +28,26 @@ namespace MoviesAPI.Controllers
         }
 
         [HttpGet] // /api/genres
-        public async Task<ActionResult<List<GenreDTO>>> Get()
+        public async Task<ActionResult<List<GenreDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
-            logger.LogInformation("Getting all the genres");
-
-            var genres = await context.Genres.ToListAsync();
+            var queryable = context.Genres.AsQueryable();
+            await HttpContext.InsertParametersPagionationIntoHeader(queryable);
+            var genres = await queryable.OrderBy(x => x.Name).Paginate(paginationDTO).ToListAsync();
 
             return mapper.Map<List<GenreDTO>>(genres);
         }
 
-        [HttpGet("{Id:int}", Name = "getGenre")]
-        public ActionResult<Genre> Get(int Id)
+        [HttpGet("{Id:int}")]
+        public async Task<ActionResult<GenreDTO>> Get(int Id)
         {
-            throw new NotImplementedException();
+            var genre = await context.Genres.FirstOrDefaultAsync(x => x.Id == Id);
+
+            if (genre == null)
+            {
+                return NotFound();
+            }
+
+            return mapper.Map<GenreDTO>(genre);
         }
 
         [HttpPost]
@@ -52,16 +60,34 @@ namespace MoviesAPI.Controllers
             return NoContent();
         }
 
-        [HttpPut]
-        public ActionResult Put([FromBody] Genre genre)
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Put(int Id,[FromBody] GenreCreationDTO genreCreationDTO)
         {
-            throw new NotImplementedException();
+            var genre = await context.Genres.FirstOrDefaultAsync(x => x.Id == Id);
+
+            if (genre == null)
+            {
+                return NotFound();
+            }
+
+            genre = mapper.Map(genreCreationDTO, genre);
+            await context.SaveChangesAsync();
+            return NoContent();
         }
 
-        [HttpDelete]
-        public ActionResult Delete()
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
         {
-            throw new NotImplementedException();
+            var exists = await context.Genres.AnyAsync(x => x.Id == id);
+
+            if (!exists)
+            {
+                return NotFound();
+            }
+
+            context.Remove(new Genre() { Id = id });
+            await context.SaveChangesAsync();
+            return NoContent();
         }
 
     }
